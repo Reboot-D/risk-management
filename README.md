@@ -1,137 +1,179 @@
 # 风险数据管理系统
 
-一个基于 Node.js 和 React 的风险数据管理系统，用于处理和分析交易风险数据。
+## 项目概述
+这是一个用于处理和管理风险数据的系统，支持数据的导入、导出、查看和分析。
 
 ## 技术栈
+- 后端：Node.js + TypeScript + Express
+- 数据库：MySQL (Tencent Cloud)
+- 前端：React + TypeScript (开发中)
 
-### 后端
-- Node.js
-- Express
-- TypeScript
-- MySQL (腾讯云数据库)
-- JWT 认证
+## 主要功能
+1. 数据导入
+   - 支持 CSV 文件导入
+   - 智能数据清洗和格式转换
+   - 灵活的数据验证
 
-### 前端
-- React (Next.js)
-- TypeScript
-- Ant Design
-- Axios
+2. 数据处理
+   - 自动据类型转换
+   - 风险等级标准化
+   - 数据脱敏处理
 
-## 功能特性
+3. 数据导出
+   - CSV 格式导出
+   - 数据过滤和筛选
+   - 自定义导出字段
 
-- 交易数据管理
-- 风险等级评估
-- 数据可视化
-- 实时数据更新
-- 导出数据功能
-
-## 开始使用
-
-### 环境要求
-
-- Node.js >= 14
-- MySQL >= 8.0
-- npm >= 6
-
-### 安装步骤
-
-1. 克隆仓库
-```bash
-git clone https://github.com/Reboot-D/risk-management.git
-cd risk-management
+## 项目结构
+```
+├── src/
+│   ├── config/         # 配置文件
+│   ├── controllers/    # 控制器
+│   ├── models/         # 数据模型
+│   ├── routes/         # 路由
+│   └── index.ts        # 入口文件
+├── frontend/           # 前端代码（开发中）
+├── .env               # 环境变量
+├── package.json       # 项目依赖
+└── tsconfig.json      # TypeScript 配置
 ```
 
-2. 安装依赖
+## 数据字段说明
+
+### 基本交易信息
+- mc_create_trade_ip: 商户端创建订单的外网IP地址
+- mcCreateTradeTime: 交易创单时间
+- mcCreateTradeChannelType: 交易商品分类（实物/虚拟）
+- mcCreateTradeChannel: 交易商品分类渠道
+- tradeChannelRiskLevel: 风险等级（high/mid/low/rel）
+- isFundFreezeBiz: 是否资金保证金业务（Y/N）
+
+### 外部账户信息
+- extraAccountRegTime: 注册时间
+- extraAccountName: 账户姓名
+- extraAccountCertno: 证件号
+- extraAccountPhone: 手机号
+- extraAccountRiskLevel: 账户风险等级
+- extraAccountBusinessLevel: 业务等级（1/2/3）
+
+### 风险控制信息
+- chargedCardNumberRiskLevel: 账号风险等级
+- extraMerchantRiskLevel: 商户风险等级
+- extraCreateTradeRiskLevel: 交易风险等级
+- extraCreateTradeControlMethod: 管控方式
+
+## 安装和运行
+
+1. 安装依赖
 ```bash
-# 安装后端依赖
 npm install
-
-# 安装前端依赖
-cd frontend
-npm install
 ```
 
-3. 配置环境变量
-```bash
-# 复制环境变量示例文件
-cp .env.example .env
-
-# 编辑 .env 文件，填入实际配置
+2. 配置环境变量
+复制 .env.example 到 .env 并填写配置：
+```env
+NODE_ENV=development
+PORT=3001
+DB_HOST=your-db-host
+DB_PORT=your-db-port
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=your-db-name
 ```
 
-4. 初始化数据库
-```bash
-npm run init-db
-```
-
-5. 启动服务
-```bash
-# 启动后端服务
-npm run dev
-
-# 启动前端服务
-cd frontend
-npm run dev
-```
-
-## 部署
-
-### 后端部署
-1. 构建项目
-```bash
-npm run build
-```
-
-2. 启动服务
-```bash
-npm start
-```
-
-### 前端部署
-1. 构建项目
-```bash
-cd frontend
-npm run build
-```
-
-2. 启动服务
+3. 运行项目
 ```bash
 npm start
 ```
 
 ## API 文档
 
-### 认证接口
-- POST /api/auth/login - 用户登录
-- GET /api/auth/verify - 验证token
-- POST /api/auth/logout - 用户登出
+### 数据导入
+POST /api/trades/import
+- 请求：multipart/form-data
+- 文件字段：file (CSV)
+- 响应：
+  ```json
+  {
+    "status": "success",
+    "total": 10,
+    "success": 8,
+    "failed": 2,
+    "warnings": [],
+    "errors": []
+  }
+  ```
 
-### 交易数据接口
-- GET /api/trades - 获取交易列表
-- POST /api/trades - 创建新交易
-- GET /api/trades/export - 导出交易数据
+### 数据导出
+GET /api/trades/export
+- 响应：CSV 文件
 
-## 安全说明
+### 获取交易列表
+GET /api/trades
+- 响应：
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "mc_create_trade_ip": "192.168.1.1",
+        "mcCreateTradeTime": "2023-12-01 10:00:00",
+        ...
+      }
+    ]
+  }
+  ```
 
-- 使用 JWT 进行身份认证
-- 实现了 CORS 安全配置
-- 使用 helmet 增强安全性
-- 实现了速率限制
-- 敏感数据加密存储
+## 数据验证规则
+
+1. 日期时间格式
+   - 支持多种格式：YYYY-MM-DD HH:mm:ss, YYYY/MM/DD, YYYY.MM.DD 等
+   - 自动转换为标准格式
+
+2. 风险等级
+   - 支持多种表示：high/mid/low/rel
+   - 支持中文：高/中/低/可信
+   - 支持数字：3/2/1/0
+
+3. 是否标志
+   - 支持多种表示：Y/N, yes/no, true/false, 1/0
+   - 支持中文：是/否
+
+## 注意事项
+
+1. 敏感数据处理
+   - 证件号和手机号进行脱敏处理
+   - 只保存必要的明文信息
+
+2. 数据导入建议
+   - 建议使用 UTF-8 编码的 CSV 文件
+   - 建议保持字段名称一致
+   - 大文件建议分批导入
+
+## 后续开发计划
+
+1. 前端界面
+   - 数据可视化展示
+   - 交互式数据筛选
+   - 实时数据更新
+
+2. 安全性增强
+   - 数据加密传输
+   - 访问权限控制
+   - 操作日志记录
+
+3. 功能扩展
+   - 批量数据处理
+   - 自定义数据规则
+   - 风险预警系统
 
 ## 贡献指南
 
 1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
+2. 创建特性分支
+3. 提交更改
+4. 推送到分支
 5. 创建 Pull Request
 
 ## 许可证
-
-[MIT](LICENSE)
-
-## 联系方式
-
-- 作者：Reboot-D
-- 邮箱：cardiffcr@gmail.com 
+MIT License

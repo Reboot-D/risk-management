@@ -12,6 +12,13 @@ export enum TradeChannelType {
   VIRTUAL = 'virtual'
 }
 
+// 交易控制方法枚举
+export enum TradeControlMethod {
+  BLOCK = 'block',
+  VERIFY = 'verify',
+  PASS = 'pass'
+}
+
 // 基本交易信息接口
 export interface TradeInfo {
   id?: number;
